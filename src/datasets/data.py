@@ -33,8 +33,6 @@ class data_raw(data.Dataset):
 
         self.data.sort()
         self.annotations.sort()
-        print(self.data[:5])
-        print(self.annotations[:5])
 
     def __getitem__(self, index):
         if self.is_train:
@@ -59,7 +57,7 @@ class data_raw(data.Dataset):
                            tvtf.ToTensor()
                            ])
         image, annotation = tf(image), tf_label(annotation)
-        return (image, annotation[0,:,:])
+        return (image, annotation)
 
     def __len__(self):
         return len(self.data)

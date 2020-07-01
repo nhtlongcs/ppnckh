@@ -1,12 +1,12 @@
 id: 1
 pretrained: Null
 model:
-    name:                       UNet
+    name:                       R2UNet
     args:
-        nclasses:               42
+        nclasses:               2
         in_channels:            3
-        first_channels:         64
         depth:                  4
+        t:                      2
 optimizer:
     name:                       Adam
     args:
@@ -15,14 +15,8 @@ loss:
     name:                       DiceLoss
     args:
 metric:
-    -   name:                   DiceScore
-        args:                     
-            nclasses:           2
     -   name:                   PixelAccuracy
         args:                     
-            nclasses:           2
-    -   name:                   MeanIoU
-        args:                   
             nclasses:           2
 
 scheduler:
@@ -33,7 +27,7 @@ dataset:
     train:
         name: data_raw
         args:
-            data_root_dir:      /home/ken/ppnckh/src/data/         
+            data_root_dir:      /content/ppnckh/src/data/         
             train_dir:          train_image/
             val_dir:            val_image/
             annotation_train_dir:      train_segmentation/ 
@@ -47,7 +41,7 @@ dataset:
     val:
         name: data_raw
         args:
-            data_root_dir:      /home/ken/ppnckh/src/data/         
+            data_root_dir:      /content/ppnckh/src/data/         
             train_dir:          train_image/
             val_dir:            val_image/
             annotation_train_dir:      train_segmentation/ 
@@ -60,6 +54,6 @@ dataset:
                 shuffle:        True
 trainer: 
     nepochs: 10
-    cp_dir: /home/ken/ppnckh/cp/
+    cp_dir: /content/ppnckh/cp/
     val_step: 1
     log_step: 1

@@ -186,8 +186,8 @@ class EfficientUNet(nn.Module):
 
 
 if __name__ == "__main__":
-    dev = torch.device('cuda')
-    net = EfficientUNet(2, 3, '', 'b0').to(dev)
+    dev = torch.device('cpu')
+    net = EfficientUNet(2, 3, 'b0', '').to(dev)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
 
