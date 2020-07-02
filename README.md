@@ -13,6 +13,7 @@
 
 </p>
 <strong>Implemented</strong>: 
+<br />
 <a href="https://github.com/hcmus18120134/ppnckh/blob/nhtlong-dev/src/models/unet.py">
   Unet
 <br />
