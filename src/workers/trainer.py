@@ -35,7 +35,7 @@ class Trainer():
         self.metric = metric
 
         # Train ID
-        self.train_id = str(self.config.get('id', 'None'))
+        self.train_id = self.config['model']['name']
         self.train_id += '-' + \
             datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
 
@@ -51,9 +51,14 @@ class Trainer():
         self.val_metric = {k: list() for k in self.metric.keys()}
 
         # Instantiate loggers
-        self.save_dir = os.path.join('runs', self.train_id)
-        self.cp_dir = cp_dir
+        self.cp_dir = os.path.join(cp_dir, self.config['model']['name'])
+
+        self.save_dir = os.path.join(
+            'runs/', self.train_id)
         self.tsboard = TensorboardLogger(path=self.save_dir)
+
+        if not os.path.exists(self.cp_dir):
+            os.makedirs(self.cp_dir)
 
     def save_checkpoint(self, epoch, val_loss, val_metric):
 
@@ -68,7 +73,7 @@ class Trainer():
             print(
                 f'Loss is improved from {self.best_loss: .6f} to {val_loss: .6f}. Saving weights...')
             torch.save(data, os.path.join(
-                self.cp_dir, f'best_loss.pth'))
+                self.cp_dir, f'best_loss {val_loss: .6f}.pth'))
             # Update best_loss
             self.best_loss = val_loss
         else:

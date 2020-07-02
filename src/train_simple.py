@@ -95,7 +95,7 @@ def train(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--config', default='configs/local/resunet_local.yaml')
+        '--config', default='configs/local/unet_local.yaml')
     parser.add_argument('--gpus', default=0)
     parser.add_argument('--debug', default=False)
 

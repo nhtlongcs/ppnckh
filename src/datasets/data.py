@@ -34,8 +34,8 @@ class data_raw(data.Dataset):
 
         self.data.sort()
         self.annotations.sort()
-        self.data = self.data[:4]
-        self.annotations = self.annotations[:4]
+        self.data = self.data[:5]
+        self.annotations = self.annotations[:5]
 
     def __getitem__(self, index):
         if self.is_train:
@@ -59,7 +59,7 @@ class data_raw(data.Dataset):
                                  ])
         image, annotation = tf(image), tf_label(annotation)
         annotation = annotation[0, :, :]
-        return (image, annotation.double())
+        return (image, annotation.long())
 
     def __len__(self):
         return len(self.data)
@@ -74,4 +74,3 @@ if __name__ == "__main__":
     print(dataset[0][1].shape)
     print(torch.max(dataset[0][0]).item())
     print(torch.max(dataset[0][1]).item())
-
