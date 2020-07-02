@@ -36,7 +36,7 @@ dataset:
         loader:
             name: data_loader
             args:
-                batch_size:     2
+                batch_size:     32
                 shuffle:        True
     val:
         name: data_raw
@@ -50,7 +50,7 @@ dataset:
         loader:
             name: data_loader
             args:
-                batch_size:     2
+                batch_size:     32
                 shuffle:        True
 trainer: 
     nepochs: 10

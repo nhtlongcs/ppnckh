@@ -18,46 +18,48 @@ class data_raw(data.Dataset):
         self.train_dir = os.path.join(self.root_dir, train_dir)
         self.val_dir = os.path.join(self.root_dir, val_dir)
 
-
         self.data = None
         self.annotations = None
 
-        if self.is_train:   
-            self.annotation_dir = os.path.join(self.root_dir, annotation_train_dir)
+        if self.is_train:
+            self.annotation_dir = os.path.join(
+                self.root_dir, annotation_train_dir)
             self.data = os.listdir(self.train_dir)
             self.annotations = os.listdir(self.annotation_dir)
-        elif self.is_train == False:        
-            self.annotation_dir = os.path.join(self.root_dir, annotation_val_dir)
+        elif self.is_train == False:
+            self.annotation_dir = os.path.join(
+                self.root_dir, annotation_val_dir)
             self.data = os.listdir(self.val_dir)
             self.annotations = os.listdir(self.annotation_dir)
 
         self.data.sort()
         self.annotations.sort()
+        self.data = self.data[:4]
+        self.annotations = self.annotations[:4]
 
     def __getitem__(self, index):
         if self.is_train:
             item_path = self.train_dir + self.data[index]
         else:
             item_path = self.val_dir + self.data[index]
-        
+
         annotation_path = self.annotation_dir + self.annotations[index]
         image = Image.open(item_path).convert('RGB')
         annotation = Image.open(annotation_path).convert('LA')
-
-
         tf = tvtf.Compose([tvtf.Resize(224),
                            tvtf.CenterCrop(224),
                            tvtf.ToTensor(),
                            tvtf.Normalize(mean=[0.485, 0.456, 0.406],
                                           std=[0.229, 0.224, 0.225])
                            ])
-        
+
         tf_label = tvtf.Compose([tvtf.Resize(224),
-                           tvtf.CenterCrop(224),
-                           tvtf.ToTensor()
-                           ])
+                                 tvtf.CenterCrop(224),
+                                 tvtf.ToTensor()
+                                 ])
         image, annotation = tf(image), tf_label(annotation)
-        return (image, annotation)
+        annotation = annotation[0, :, :]
+        return (image, annotation.double())
 
     def __len__(self):
         return len(self.data)
@@ -65,12 +67,11 @@ class data_raw(data.Dataset):
 
 # test
 if __name__ == "__main__":
-    dataset = data_raw('/home/ken/ppnckh/src/data/', 'train_image/','val_image/',
-                         'train_segmentation/','val_segmentation/',is_train=False)
+    dataset = data_raw('/home/ken/ppnckh/ppnckh/src/data/', 'train_image/', 'val_image/',
+                       'train_segmentation/', 'val_segmentation/', is_train=False)
     print(len(dataset))
     print(dataset[0][0].shape)
     print(dataset[0][1].shape)
     print(torch.max(dataset[0][0]).item())
     print(torch.max(dataset[0][1]).item())
-
 

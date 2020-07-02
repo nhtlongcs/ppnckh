@@ -120,7 +120,6 @@ class Trainer():
                     self.tsboard.update_loss(
                         'train', running_loss.value()[0], epoch * len(dataloader) + i)
                     running_loss.reset()
-
                 # 8: Update metric
                 outs = detach(outs)
                 lbl = detach(lbl)

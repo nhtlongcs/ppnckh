@@ -15,7 +15,7 @@ loss:
     name:                       DiceLoss
     args:
 metric:
-    -   name:                   PixelAccuracy
+    -   name:                   DiceScore
         args:                     
             nclasses:           2
 

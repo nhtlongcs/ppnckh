@@ -74,6 +74,7 @@ def train(config):
 
     metric = {mcfg['name']: get_instance(mcfg)
               for mcfg in config['metric']}
+
     # 7: Create trainer
     set_seed()
     trainer = Trainer(device=device,
@@ -94,7 +95,7 @@ def train(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--config', default='configs/train/unet_local.yaml')
+        '--config', default='configs/local/resunet_local.yaml')
     parser.add_argument('--gpus', default=0)
     parser.add_argument('--debug', default=False)
 

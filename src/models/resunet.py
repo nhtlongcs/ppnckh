@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
 import torchvision
+# from losses import DiceLoss
 
 
 class ConvBlock(nn.Module):
@@ -151,13 +152,13 @@ class ResidUNet(nn.Module):
 
 if __name__ == "__main__":
     dev = torch.device('cpu')
-    net = ResidUNet(1, 2).to(dev)
+    net = ResidUNet(3, 2).to(dev)
     print(net)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
     for iter_id in range(100):
-        inps = torch.rand(4, 1, 100, 100).to(dev)
-        lbls = torch.randint(low=0, high=2, size=(4, 100, 100)).to(dev)
+        inps = torch.rand(5, 3, 100, 100).to(dev)
+        lbls = torch.randint(low=0, high=2, size=(5, 100, 100)).to(dev)
         outs = net(inps)
         loss = criterion(outs, lbls)
         loss.backward()

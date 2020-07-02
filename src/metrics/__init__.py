@@ -1,1 +1,1 @@
-from .segmentation_metrics import PixelAccuracy
+from .segmentation_metrics import DiceScore
