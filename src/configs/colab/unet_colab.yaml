@@ -28,7 +28,7 @@ metric:
 scheduler:
     name:                       CosineAnnealingLR
     args:
-        T_max:                  761        
+        T_max:                  267        
 dataset:
     train:
         name: data_raw
