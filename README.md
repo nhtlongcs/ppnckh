@@ -12,15 +12,19 @@
 </a>
 
 </p>
-<strong>Members</strong>: 
+<strong>Implemented</strong>: 
 <a href="https://github.com/hcmus18120134/ppnckh/blob/nhtlong-dev/src/models/unet.py">
   Unet
+<br />
 <a href="https://github.com/hcmus18120134/ppnckh/blob/nhtlong-dev/src/models/nestedunet.py">
   Unet++ (Nested Unet)
+<br />
 <a href="https://github.com/hcmus18120134/ppnckh/blob/nhtlong-dev/src/models/effunet.py">
   Unet with Efficientnet encoder (all version)
+<br />
 <a href="https://github.com/hcmus18120134/ppnckh/blob/nhtlong-dev/src/models/resunet.py">
   Unet with ResNet50 encoder
+<br />
 <a href="https://github.com/hcmus18120134/ppnckh/blob/nhtlong-dev/src/models/r2u.py">
   R2U-Net
 </a>
