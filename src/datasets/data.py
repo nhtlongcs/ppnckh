@@ -34,8 +34,8 @@ class data_raw(data.Dataset):
 
         self.data.sort()
         self.annotations.sort()
-        self.data = self.data[:5]
-        self.annotations = self.annotations[:5]
+        self.data = self.data
+        self.annotations = self.annotations
 
     def __getitem__(self, index):
         if self.is_train:
