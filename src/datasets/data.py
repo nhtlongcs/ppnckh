@@ -101,9 +101,9 @@ class data_pose(data.Dataset):
         self.data_pose.sort()
         self.annotations.sort()
         # header
-        self.data = self.data[:5]
-        self.data_pose = self.data_pose[:5]
-        self.annotations = self.annotations[:5]
+        # self.data = self.data[:5]
+        # self.data_pose = self.data_pose[:5]
+        # self.annotations = self.annotations[:5]
 
     def __getitem__(self, index):
         if self.is_train:
