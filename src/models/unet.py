@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -195,23 +196,68 @@ class UNet(nn.Module):
         x = self.encoder(x)
         features = self.encoder.get_features()
         mid = self.middle_conv(x)
-
         x = self.decoder(mid, features)
         x = self.final_conv(x)
         return x
 
 
-if __name__ == "__main__":
-    from tqdm import tqdm
+class UNetPose(nn.Module):
+    def __init__(self, nclasses, in_channels, first_channels, depth):
+        super(UNetPose, self).__init__()
+        self.encoder = UNetEncoder(in_channels, depth, first_channels)
+        self.middle_conv = MiddleBlock(first_channels * 2**(depth - 1),
+                                       first_channels * 2**depth)
 
+        self.encoder_pose = UNetEncoder(1, depth, first_channels)
+
+        self.decoder = UNetDecoder(depth, first_channels * 2**depth)
+        self.final_conv = nn.Conv2d(first_channels, nclasses, kernel_size=1)
+
+    def forward(self, x):
+        # print("print shape")
+        # print(x[:, :3, :, :].shape)
+        # print(x[:, 3:4, :, :].shape)
+        pose = self.encoder_pose(x[:, 3:4, :, :])
+        x = self.encoder(x[:, :3, :, :])
+        features = self.encoder.get_features()
+        # print("print feature shape")
+        # print(pose.shape)
+        # print(x.shape)
+        x += pose
+        mid = self.middle_conv(x)
+        x = self.decoder(mid, features)
+        x = self.final_conv(x)
+        return x
+
+
+# if __name__ == "__main__":
+    # dev = torch.device('cpu')
+    # net = UNet(2, 1, 64, 4).to(dev)
+    # criterion = nn.CrossEntropyLoss()
+    # optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
+
+    # tbar = tqdm(range(100))
+    # for iter_id in tbar:
+    #     inps = torch.rand(8, 1, 224, 224).to(dev)
+    #     lbls = torch.randint(low=0, high=2, size=(8, 224, 224)).to(dev)
+
+    #     outs = net(inps)
+
+    #     loss = criterion(outs, lbls)
+    #     loss.backward()
+    #     optimizer.step()
+
+    #     tbar.set_description_str(f'{iter_id}: {loss.item()}')
+
+if __name__ == "__main__":
     dev = torch.device('cpu')
-    net = UNet(2, 1, 64, 4).to(dev)
+    net = UNetPose(2, 3, 64, 4).to(dev)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
 
     tbar = tqdm(range(100))
     for iter_id in tbar:
-        inps = torch.rand(8, 1, 224, 224).to(dev)
+        inps = torch.rand(8, 4, 224, 224).to(dev)
         lbls = torch.randint(low=0, high=2, size=(8, 224, 224)).to(dev)
 
         outs = net(inps)

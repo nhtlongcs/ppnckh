@@ -202,17 +202,59 @@ class R2UNet(nn.Module):
         return x
 
 
+class R2UNetPose(nn.Module):
+    def __init__(self, nclasses, in_channels, depth, t):
+        super().__init__()
+        self.encoder = R2UNetEncoder(in_channels, depth, 64, t)
+        self.encoder_pose = R2UNetEncoder(1, depth, 64, t)
+        self.middle_conv = R2UNetMiddle(64*2**(depth-1), 64*2**depth, t)
+        self.decoder = R2UNetDecoder(depth, 64*2**depth, t)
+        self.final_conv = nn.Conv2d(64, nclasses, kernel_size=1)
+
+    def forward(self, x):
+        pose = self.encoder_pose(x[:, 3:4, :, :])
+        x = self.encoder(x[:, :3, :, :])
+        features = self.encoder.get_features()
+        x += pose
+        mid = self.middle_conv(x)
+        x = self.decoder(mid, features)
+        x = self.final_conv(x)
+        return x
+
+
+# if __name__ == "__main__":
+#     from tqdm import tqdm
+#     dev = torch.device('cpu')
+#     net = R2UNet(2, 3, 4, 2).to(dev)
+#     print(net)
+#     criterion = nn.CrossEntropyLoss()
+#     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
+
+#     tbar = tqdm(range(100))
+#     for i in tbar:
+#         inps = torch.rand(4, 3, 100, 100).to(dev)
+#         lbls = torch.randint(low=0, high=2, size=(4, 100, 100)).to(dev)
+
+#         outs = net(inps)
+
+#         loss = criterion(outs, lbls)
+#         loss.backward()
+#         optimizer.step()
+
+#         tbar.set_description_str(f'{i}: {loss.item()}')
+
+
 if __name__ == "__main__":
     from tqdm import tqdm
     dev = torch.device('cpu')
-    net = R2UNet(2, 3, 4, 2).to(dev)
-    print(net)
+    net = R2UNetPose(2, 3, 4, 2).to(dev)
+    # print(net)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
 
     tbar = tqdm(range(100))
     for i in tbar:
-        inps = torch.rand(4, 3, 100, 100).to(dev)
+        inps = torch.rand(4, 4, 100, 100).to(dev)
         lbls = torch.randint(low=0, high=2, size=(4, 100, 100)).to(dev)
 
         outs = net(inps)

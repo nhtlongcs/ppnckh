@@ -185,14 +185,72 @@ class EfficientUNet(nn.Module):
         return self.final_conv(x)
 
 
+class EfficientUNetPose(nn.Module):
+    def __init__(self, nclasses, in_channels, version, method=''):
+        super().__init__()
+        self.init_conv = nn.Conv2d(in_channels, 3, kernel_size=1, padding=0)
+        self.init_conv_pose = nn.Conv2d(
+            1, 3, kernel_size=1, padding=0)
+
+        self.effnet = EfficientNetEncoder(
+            **efficient_net_encoders[f'efficientnet-{version}'])
+
+        self.effnet_pose = EfficientNetEncoder(
+            **efficient_net_encoders[f'efficientnet-{version}'])
+
+        self.middle_block = MiddleBlock(320, 640)
+        self.up_conv = nn.ModuleList([
+            DecoderBlock(640, 320, 320, method),
+            DecoderBlock(320, 112, 112, method),
+            DecoderBlock(112, 40, 40, method),
+            DecoderBlock(40, 24, 24, method),
+            DecoderBlock(24, 32, 32, method),
+            DecoderBlock(32, 64, 3, method)
+        ])
+        self.final_conv = nn.Conv2d(64, nclasses, kernel_size=1)
+
+    def forward(self, x):
+
+        pose = self.init_conv_pose(x[:, 3:4, :, :])
+        x = self.init_conv(x[:, :3, :, :])
+
+        enc_fts_pose = self.effnet_pose(pose)
+        enc_fts = self.effnet(x)
+        # print("Print shape")
+        # print(enc_fts_pose[-1].shape)
+        # print(enc_fts[-1].shape)
+        # enc_fts += enc_fts_pose
+        x = self.middle_block(enc_fts[-1]+enc_fts_pose[-1])
+        enc_fts = enc_fts[::-1]
+        for enc_ft, upconv in zip(enc_fts, self.up_conv):
+            x = upconv(x, enc_ft)
+        return self.final_conv(x)
+# if __name__ == "__main__":
+#     dev = torch.device('cpu')
+#     net = EfficientUNet(2, 3, 'b0', '').to(dev)
+#     criterion = nn.CrossEntropyLoss()
+#     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
+
+#     for iter_id in range(100):
+#         inps = torch.rand(2, 3, 512, 512).to(dev)
+#         lbls = torch.randint(low=0, high=2, size=(2, 512, 512)).to(dev)
+
+#         outs = net(inps)
+#         loss = criterion(outs, lbls)
+#         loss.backward()
+#         optimizer.step()
+
+#         print(iter_id, loss.item())
+
+
 if __name__ == "__main__":
     dev = torch.device('cpu')
-    net = EfficientUNet(2, 3, 'b0', '').to(dev)
+    net = EfficientUNetPose(2, 3, 'b0', '').to(dev)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
 
     for iter_id in range(100):
-        inps = torch.rand(2, 3, 512, 512).to(dev)
+        inps = torch.rand(2, 4, 512, 512).to(dev)
         lbls = torch.randint(low=0, high=2, size=(2, 512, 512)).to(dev)
 
         outs = net(inps)

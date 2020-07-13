@@ -131,6 +131,9 @@ data/*.zip
 data/val_image/
 data/test_image/
 data/train_image/
+data/val_pose/
+data/test_pose/
+data/train_pose/
 data/val_segmentation/
 data/test_segmentation/
 data/train_segmentation/

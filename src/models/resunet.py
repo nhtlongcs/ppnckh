@@ -150,6 +150,88 @@ class ResidUNet(nn.Module):
                 module.eval()
 
 
+class ResidUNetPose(nn.Module):
+    DEPTH = 6
+
+    def __init__(self, in_channels, nclasses):
+        super().__init__()
+
+        resnet = torchvision.models.resnet.resnet50(pretrained=True)
+        down_blocks = []
+        self.input_block = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels, out_channels=3,
+                      kernel_size=1, padding=0),
+            nn.Sequential(*list(resnet.children()))[:3]
+        )
+        self.input_pool = list(resnet.children())[3]
+        for bottleneck in list(resnet.children()):
+            if isinstance(bottleneck, nn.Sequential):
+                down_blocks.append(bottleneck)
+        self.down_blocks = nn.ModuleList(down_blocks)
+
+        self.bridge = Bridge(2048, 2048)
+
+        up_blocks = []
+        up_blocks.append(UpBlockForUNetWithResNet50(2048, 1024))
+        up_blocks.append(UpBlockForUNetWithResNet50(1024, 512))
+        up_blocks.append(UpBlockForUNetWithResNet50(512, 256))
+        up_blocks.append(UpBlockForUNetWithResNet50(in_channels=128 + 64, out_channels=128,
+                                                    up_conv_in_channels=256, up_conv_out_channels=128))
+        up_blocks.append(UpBlockForUNetWithResNet50(in_channels=64 + in_channels, out_channels=64,
+                                                    up_conv_in_channels=128, up_conv_out_channels=64))
+        self.up_blocks = nn.ModuleList(up_blocks)
+
+        self.out = nn.Conv2d(64, nclasses, kernel_size=1, stride=1)
+
+        self.freeze_bn()
+
+    def forward(self, x, with_output_feature_map=False):
+        pre_pools = dict()
+        pre_pools["layer_0"] = x
+        x = self.input_block(x)
+        pre_pools["layer_1"] = x
+        x = self.input_pool(x)
+
+        for i, block in enumerate(self.down_blocks, 2):
+            x = block(x)
+            if i == (ResidUNet.DEPTH - 1):
+                continue
+            pre_pools["layer_{}".format(i)] = x
+
+        x = self.bridge(x)
+
+        for i, block in enumerate(self.up_blocks, 1):
+            key = "layer_{}".format(ResidUNet.DEPTH - 1 - i)
+            x = block(x, pre_pools[key])
+        output_feature_map = x
+        x = self.out(x)
+        del pre_pools
+        if with_output_feature_map:
+            return x, output_feature_map
+        else:
+            return x
+
+    def freeze_bn(self):
+        for module in self.modules():
+            if isinstance(module, nn.BatchNorm2d):
+                module.eval()
+
+# if __name__ == "__main__":
+#     dev = torch.device('cpu')
+#     net = ResidUNet(3, 2).to(dev)
+#     print(net)
+#     criterion = nn.CrossEntropyLoss()
+#     optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
+#     for iter_id in range(100):
+#         inps = torch.rand(5, 3, 100, 100).to(dev)
+#         lbls = torch.randint(low=0, high=2, size=(5, 100, 100)).to(dev)
+#         outs = net(inps)
+#         loss = criterion(outs, lbls)
+#         loss.backward()
+#         optimizer.step()
+#         print(iter_id, loss.item())
+
+
 if __name__ == "__main__":
     dev = torch.device('cpu')
     net = ResidUNet(3, 2).to(dev)

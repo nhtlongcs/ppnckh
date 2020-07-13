@@ -1,7 +1,7 @@
 id: 1
 pretrained: Null
 model:
-    name:                       UNet
+    name:                       UNetPose
     args:
         nclasses:               2
         in_channels:            3
@@ -24,42 +24,45 @@ metric:
     -   name:                   MeanIoU
         args:                     
             nclasses:           2
-
 scheduler:
     name:                       CosineAnnealingLR
     args:
-        T_max:                  267        
+        T_max:                  761        
 dataset:
     train:
-        name: data_raw
+        name: data_pose
         args:
-            data_root_dir:      /content/ppnckh/src/data      
+            data_root_dir:      /home/ken/ppnckh/ppnckh/src/data/         
             train_dir:          train_image/
-            val_dir:            val_image/
+            val_dir:            val_image/      
+            train_pose_dir:          train_pose/
+            val_pose_dir:            val_pose/
             annotation_train_dir:      train_segmentation/ 
             annotation_val_dir:        val_segmentation/  
             is_train:           True  
         loader:
             name: data_loader
             args:
-                batch_size:     32
+                batch_size:     5
                 shuffle:        True
     val:
-        name: data_raw
+        name: data_pose
         args:
-            data_root_dir:      /content/ppnckh/src/data      
+            data_root_dir:      /home/ken/ppnckh/ppnckh/src/data/         
             train_dir:          train_image/
-            val_dir:            val_image/
+            val_dir:            val_image/ 
+            train_pose_dir:          train_pose/
+            val_pose_dir:            val_pose/
             annotation_train_dir:      train_segmentation/ 
             annotation_val_dir:        val_segmentation/  
             is_train:           False  
         loader:
             name: data_loader
             args:
-                batch_size:     32
+                batch_size:     5
                 shuffle:        True
 trainer: 
     nepochs: 10
-    cp_dir: /content/ppnckh/cp/
+    cp_dir: /home/ken/ppnckh/ppnckh/cp/
     val_step: 1
     log_step: 1

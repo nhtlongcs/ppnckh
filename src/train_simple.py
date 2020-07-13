@@ -46,7 +46,6 @@ def train(config):
     val_dataloader = get_instance(config['dataset']['val']['loader'],
                                   dataset=val_dataset)
     print("val :", len(val_dataset))
-
     # 2: Define network
     set_seed()
     model = get_instance(config['model']).to(device)
